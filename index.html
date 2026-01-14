@@ -1,75 +1,169 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <title>Click Counter</title>
+  <meta charset="UTF-8">
+  <title>POS Counter</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- 讓 iPad 加到主畫面像 App -->
+  <!-- iOS 加入主畫面 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
       background: #111;
       color: #fff;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-    #count {
-      font-size: 96px;
-      margin-bottom: 40px;
+    .box {
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 12px;
+    }
+    input {
+      width: 100%;
+      font-size: 24px;
+      padding: 12px;
+      margin-top: 8px;
+      text-align: center;
+      border-radius: 8px;
+      border: none;
     }
     button {
-      font-size: 32px;
-      padding: 20px 40px;
-      border-radius: 16px;
+      width: 100%;
+      font-size: 22px;
+      padding: 14px;
+      margin-top: 16px;
+      border-radius: 10px;
       border: none;
       background: #4CAF50;
       color: white;
     }
-    button:active {
-      background: #388E3C;
+    button.secondary {
+      background: #555;
+    }
+    #count {
+      font-size: 96px;
+      margin: 40px 0;
     }
   </style>
 </head>
+
 <body>
 
-  <div id="count">--</div>
-  <button onclick="increment()">+1</button>
+  <!-- 登入畫面 -->
+  <div id="login" class="box">
+    <h2>請輸入 PIN</h2>
+    <input
+      type="password"
+      id="pin"
+      inputmode="numeric"
+      placeholder="****"
+    >
+    <button onclick="login()">登入</button>
+  </div>
+
+  <!-- 主畫面 -->
+  <div id="app" class="box" style="display:none;">
+    <div id="count">--</div>
+    <button onclick="increment()">+1</button>
+    <button class="secondary" onclick="logout()">登出</button>
+  </div>
 
   <script>
+    /***** 你只需要改這一行 *****/
     const API_URL = "https://pos-v1-api-1077804657394.asia-east1.run.app"; // ← 改成你的
-    const API_KEY = "mtaugust13";                    // ← 改成你的
+    /********************************/
+
+    let sessionToken = localStorage.getItem("sessionToken");
+
+    function showLogin() {
+      document.getElementById("login").style.display = "block";
+      document.getElementById("app").style.display = "none";
+    }
+
+    function showApp() {
+      document.getElementById("login").style.display = "none";
+      document.getElementById("app").style.display = "block";
+    }
+
+    async function login() {
+      const pin = document.getElementById("pin").value;
+
+      const res = await fetch(API_URL + "?login=1", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin })
+      });
+
+      const data = await res.json();
+
+      if (data.token) {
+        localStorage.setItem("sessionToken", data.token);
+        sessionToken = data.token;
+        showApp();
+        loadCount();
+      } else {
+        alert("PIN 錯誤");
+      }
+    }
+
+    async function loadCount() {
+      const token = localStorage.getItem("sessionToken");
+      console.log("loadCount token =", token);
+
+      const res = await fetch(API_URL, {
+        headers: {
+          "x-session-token": token
+        }
+      });
+
+      const data = await res.json();
+      document.getElementById("count").innerText = data.count;
+    }
+
 
     async function increment() {
+      const token = localStorage.getItem("sessionToken");
+      console.log("increment token =", token);
+
       const res = await fetch(API_URL, {
         method: "POST",
         headers: {
-          "x-api-key": API_KEY
+          "x-session-token": token
         }
       });
+
       const data = await res.json();
       document.getElementById("count").innerText = data.count;
     }
 
-    // 頁面一開就先顯示目前數字（不 +1）
-    async function loadCount() {
-      const res = await fetch(API_URL, {
-        method: "GET",
-        headers: {
-          "x-api-key": API_KEY
-        }
-      });
-      const data = await res.json();
-      document.getElementById("count").innerText = data.count;
+
+    function logout() {
+      localStorage.removeItem("sessionToken");
+      sessionToken = null;
+      showLogin();
     }
 
-    loadCount();
+    // 頁面一開啟自動判斷是否已登入
+    // 頁面一開啟自動判斷是否已登入（正確版）
+    const token = localStorage.getItem("sessionToken");
+
+    if (token) {
+      showApp();
+      loadCount();
+    } else {
+      showLogin();
+    }
+
   </script>
 
 </body>
