@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>Click Counter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- 讓 iPad 加到主畫面像 App -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #111;
+      color: #fff;
+    }
+    #count {
+      font-size: 96px;
+      margin-bottom: 40px;
+    }
+    button {
+      font-size: 32px;
+      padding: 20px 40px;
+      border-radius: 16px;
+      border: none;
+      background: #4CAF50;
+      color: white;
+    }
+    button:active {
+      background: #388E3C;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="count">--</div>
+  <button onclick="increment()">+1</button>
+
+  <script>
+    const API_URL = "https://pos-v1-api-1077804657394.asia-east1.run.app"; // ← 改成你的
+    const API_KEY = "mtaugust13";                    // ← 改成你的
+
+    async function increment() {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "x-api-key": API_KEY
+        }
+      });
+      const data = await res.json();
+      document.getElementById("count").innerText = data.count;
+    }
+
+    // 頁面一開就先顯示目前數字（不 +1）
+    async function loadCount() {
+      const res = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          "x-api-key": API_KEY
+        }
+      });
+      const data = await res.json();
+      document.getElementById("count").innerText = data.count;
+    }
+
+    loadCount();
+  </script>
+
+</body>
+</html>
