@@ -1,6 +1,59 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+    <style>
+      .item-card {
+        min-width: 420px !important;
+        max-width: 460px !important;
+        min-height: 160px !important;
+        max-height: 180px !important;
+        box-sizing: border-box;
+      }
+      .item-right-box input, .item-right-box button {
+        box-sizing: border-box;
+      }
+      .item-right-box {
+        width: 150px;
+        min-width: 140px;
+        max-width: 180px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 8px;
+      }
+      .item-note-input {
+        width: 100%;
+        font-size: 15px;
+        padding: 6px 8px;
+        border-radius: 6px;
+        border: 1.5px solid #4CAF50;
+        background: #222;
+        color: #fff;
+      }
+      .item-amount-input {
+        width: 60px;
+        font-size: 18px;
+        padding: 6px 4px;
+        border-radius: 6px;
+        border: 1.5px solid #4CAF50;
+        background: #222;
+        color: #4CAF50;
+        text-align: center;
+      }
+      .item-plus-btn {
+        font-size: 18px;
+        padding: 8px 16px;
+        background: #4CAF50;
+        border-radius: 6px;
+        margin-left: 4px;
+      }
+      .item-btn {
+        font-size: 20px;
+        padding: 12px 24px;
+        margin-top: 8px;
+      }
+    </style>
   <meta charset="UTF-8">
   <title>POS Counter</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,89 +63,501 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background: #111;
       color: #fff;
-      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Login Screen */
+    #login {
+      width: 100%;
       height: 100vh;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
+      background: #111;
     }
-    .box {
-      width: 100%;
-      max-width: 320px;
+
+    .login-box {
       text-align: center;
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
     }
-    h2 {
-      margin-bottom: 12px;
+
+    .login-box h2 {
+      margin-bottom: 20px;
+      font-size: 28px;
     }
-    input {
+
+    .login-box input {
       width: 100%;
       font-size: 24px;
-      padding: 12px;
-      margin-top: 8px;
+      padding: 16px;
+      margin-top: 12px;
       text-align: center;
       border-radius: 8px;
       border: none;
     }
-    button {
+
+    .login-box button {
       width: 100%;
       font-size: 22px;
-      padding: 14px;
-      margin-top: 16px;
+      padding: 16px;
+      margin-top: 20px;
       border-radius: 10px;
       border: none;
       background: #4CAF50;
       color: white;
+      cursor: pointer;
     }
-    button.secondary {
+
+    .login-box button:active {
+      opacity: 0.8;
+    }
+
+    /* Main App Layout - 2 Columns */
+    #app {
+      display: none;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      gap: 0;
+    }
+
+    /* Left Section - Cart (30%) */
+    .cart-section {
+      width: 30%;
+      background: #1a1a1a;
+      border-right: 2px solid #333;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .cart-header {
+      padding: 16px;
+      background: #2a2a2a;
+      border-bottom: 2px solid #333;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .cart-items {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+    }
+
+    .cart-item {
+      background: #2a2a2a;
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      gap: 8px;
+    }
+
+    .cart-item-name {
+      flex: 1;
+      text-align: left;
+      min-width: 80px;
+    }
+
+    .cart-item-qty-input {
+      width: 70px;
+      padding: 8px 10px;
+      background: #333;
+      color: #4CAF50;
+      border: 2px solid #4CAF50;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .cart-item-qty-input:focus {
+      outline: none;
+      background: #444;
+      box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+    }
+
+    .cart-item-qty-input::-webkit-outer-spin-button,
+    .cart-item-qty-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .cart-item-qty-input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    .cart-item-qty-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cart-qty-btn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      width: 32px;
+      height: 32px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .cart-qty-btn:active {
+      background: #45a049;
+      transform: scale(0.95);
+    }
+
+    .cart-item-price {
+      text-align: right;
+      min-width: 60px;
+      font-weight: bold;
+      color: #4CAF50;
+    }
+
+    .cart-item-remove {
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .cart-item-remove:active {
+      opacity: 0.8;
+    }
+
+    .cart-footer {
+      padding: 16px;
+      background: #2a2a2a;
+      border-top: 2px solid #333;
+    }
+
+    .total-amount {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .total-amount .amount {
+      font-size: 28px;
+      color: #4CAF50;
+    }
+
+    .cart-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .cart-actions button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+    }
+
+    .btn-purchase {
+      background: orange;
+      color: #fff;
+    }
+    .btn-purchase:active {
+      background: #ff9800;
+      opacity: 0.9;
+    }
+
+    .btn-clear {
       background: #555;
     }
-    #count {
-      font-size: 96px;
-      margin: 40px 0;
+
+    .btn-clear:active {
+      opacity: 0.8;
+    }
+
+    .btn-logout {
+      background: #f44336;
+    }
+
+    .btn-logout:active {
+      opacity: 0.8;
+    }
+
+    /* Right Section - Sales Items (70%) */
+    .items-section {
+      width: 70%;
+      background: #111;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .items-header {
+      padding: 16px;
+      background: #2a2a2a;
+      border-bottom: 2px solid #333;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .items-grid {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .item-card {
+      background: #2a2a2a;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      text-align: left;
+      gap: 12px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+      border: 2px solid #333;
+      width: 66.67%;
+      max-width: 460px;
+    }
+
+    .item-card:active {
+      background: #4CAF50;
+      transform: scale(0.98);
+    }
+
+    .item-image {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .item-details {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .item-name {
+      font-size: 14px;
+      font-weight: bold;
+      margin: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .item-price {
+      font-size: 16px;
+      color: #4CAF50;
+      font-weight: bold;
+      margin: 0;
+      text-align: left;
+      margin-left: 12px;
+    }
+
+    .item-btn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .item-btn:active {
+      opacity: 0.8;
+    }
+
+    .item-btn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      width: auto;
+      white-space: nowrap;
+    }
+
+    .item-btn:active {
+      opacity: 0.8;
+    }
+
+    /* Scrollbar Styling */
+    .cart-items::-webkit-scrollbar,
+    .items-grid::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .cart-items::-webkit-scrollbar-track,
+    .items-grid::-webkit-scrollbar-track {
+      background: #1a1a1a;
+    }
+
+    .cart-items::-webkit-scrollbar-thumb,
+    .items-grid::-webkit-scrollbar-thumb {
+      background: #4CAF50;
+      border-radius: 3px;
+    }
+
+    @media (max-width: 1024px) {
+      .item-card {
+        height: 90px;
+        padding: 10px;
+      }
+
+      .item-image {
+        width: 70px;
+        height: 70px;
+      }
+
+      .item-name {
+        font-size: 14px;
+      }
+
+      .item-price {
+        font-size: 16px;
+      }
     }
   </style>
 </head>
 
 <body>
-
-  <!-- 登入畫面 -->
-  <div id="login" class="box">
-    <h2>請輸入 PIN</h2>
-    <input
-      type="password"
-      id="pin"
-      inputmode="numeric"
-      placeholder="****"
-    >
-    <button onclick="login()">登入</button>
+  <!-- Custom Modal for Clear Cart Confirmation -->
+  <div id="clearCartModal" style="display:none;position:fixed;z-index:1000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.45);justify-content:center;align-items:center;">
+    <div style="background:#232323;padding:32px 24px;border-radius:16px;box-shadow:0 4px 32px #0008;min-width:280px;text-align:center;">
+      <div style="font-size:22px;font-weight:bold;margin-bottom:18px;color:#fff;">確定要清空購物車？</div>
+      <div style="display:flex;gap:18px;justify-content:center;">
+        <button id="clearCartCancelBtn" style="padding:12px 28px;font-size:18px;border-radius:8px;border:none;background:#555;color:#fff;cursor:pointer;">取消</button>
+        <button id="clearCartConfirmBtn" style="padding:12px 28px;font-size:18px;border-radius:8px;border:none;background:#f44336;color:#fff;cursor:pointer;">清空</button>
+      </div>
+    </div>
   </div>
 
-  <!-- 主畫面 -->
-  <div id="app" class="box" style="display:none;">
-    <div id="count">--</div>
-    <button onclick="increment()">+1</button>
-    <button class="secondary" onclick="logout()">登出</button>
+  <!-- 登入畫面 -->
+  <div id="login">
+    <div class="login-box">
+      <h2>請輸入 PIN</h2>
+      <input
+        type="password"
+        id="pin"
+        inputmode="numeric"
+        placeholder="****"
+      >
+      <button onclick="login()">登入</button>
+    </div>
+  </div>
+
+  <!-- 主畫面 - iPad 雙欄版 -->
+  <div id="app">
+    <!-- Top right logout button -->
+    <button id="logoutTopRight" class="btn-logout" style="position:fixed;top:8px;right:24px;z-index:100;min-width:90px;font-size:18px;padding:12px 20px;height:52px;display:flex;align-items:center;justify-content:center;line-height:28px;">登出</button>
+    <!-- 左欄 (30%) - 購物車 -->
+    <div class="cart-section">
+      <div class="cart-header">🛒 購物車</div>
+      
+      <div class="cart-items" id="cartItems">
+        <!-- 購物車項目會動態加入這裡 -->
+      </div>
+
+      <div class="cart-footer">
+        <div class="total-amount">
+          <span>總金額:</span>
+          <span class="amount" id="totalAmount">$0</span>
+        </div>
+        <div class="cart-actions">
+          <button class="btn-clear" onclick="clearCart()">清空購物車</button>
+          <button class="btn-purchase" onclick="purchaseCart()">結帳</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右欄 (70%) - 銷售商品 -->
+    <div class="items-section" style="width:70%;">
+      <div class="items-header">📦 商品列表</div>
+      <div class="items-grid" id="itemsGrid">
+        <!-- 商品卡片會動態加入這裡 -->
+      </div>
+    </div>
   </div>
 
   <script>
+        // Move logout logic to top right button
+        document.addEventListener('DOMContentLoaded', function() {
+          var logoutBtn = document.getElementById('logoutTopRight');
+          if (logoutBtn) logoutBtn.onclick = logout;
+        });
+
+        // Dummy purchaseCart function (to be implemented)
+        function purchaseCart() {
+          alert('結帳功能尚未實作');
+        }
     /***** 你只需要改這一行 *****/
     const API_URL = "https://pos-v1-api-1077804657394.asia-east1.run.app"; // ← 改成你的
     /********************************/
 
     let sessionToken = localStorage.getItem("sessionToken");
+    let cart = []; // 購物車陣列
+    let allItems = []; // 所有商品
 
     function showLogin() {
-      document.getElementById("login").style.display = "block";
+      document.getElementById("login").style.display = "flex";
       document.getElementById("app").style.display = "none";
     }
 
     function showApp() {
       document.getElementById("login").style.display = "none";
-      document.getElementById("app").style.display = "block";
+      document.getElementById("app").style.display = "flex";
     }
 
     async function login() {
@@ -110,56 +575,361 @@
         localStorage.setItem("sessionToken", data.token);
         sessionToken = data.token;
         showApp();
-        loadCount();
+        loadItems();
       } else {
         alert("PIN 錯誤");
       }
     }
 
-    async function loadCount() {
+    async function loadItems() {
       const token = localStorage.getItem("sessionToken");
-      console.log("loadCount token =", token);
+      console.log("loadItems token =", token);
 
-      const res = await fetch(API_URL, {
-        headers: {
-          "x-session-token": token
+      // 6 個範例商品
+      allItems = [
+        { id: 1, name: "咖啡", price: 45 },
+        { id: 2, name: "美式咖啡", price: 50 },
+        { id: 3, name: "拿鐵", price: 60 },
+        { id: 4, name: "卡布奇諾", price: 60 },
+        { id: 5, name: "抹茶拿鐵", price: 65 },
+        { id: 6, name: "牛奶茶", price: 50 }
+      ];
+
+      renderItems();
+
+      // 可選：嘗試從 API 獲取商品列表
+      try {
+        const res = await fetch(API_URL, {
+          headers: {
+            "x-session-token": token
+          }
+        });
+
+        const data = await res.json();
+        
+        // 如果 API 有回傳商品列表，則使用 API 數據
+        if (data.items && Array.isArray(data.items)) {
+          allItems = data.items;
+          renderItems();
         }
-      });
-
-      const data = await res.json();
-      document.getElementById("count").innerText = data.count;
+      } catch (error) {
+        console.error("Error loading items from API:", error);
+      }
     }
 
+    function renderItems() {
+      const itemsGrid = document.getElementById("itemsGrid");
+      itemsGrid.innerHTML = "";
 
-    async function increment() {
-      const token = localStorage.getItem("sessionToken");
-      console.log("increment token =", token);
+      const items = allItems.slice(0, 6);
 
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "x-session-token": token
+      // Store temp note and amount for each item
+      if (!window.itemNotes) window.itemNotes = {};
+      if (!window.itemAmounts) window.itemAmounts = {};
+
+      items.forEach(item => {
+        // Row container for card and controls
+        const row = document.createElement("div");
+        row.style.display = "flex";
+        row.style.flexDirection = "row";
+        row.style.alignItems = "center";
+        row.style.gap = "16px";
+        row.style.marginBottom = "8px";
+
+        // --- Item Card ---
+        const card = document.createElement("div");
+        card.className = "item-card";
+        card.setAttribute("role", "button");
+        card.tabIndex = 0;
+
+        const img = document.createElement("img");
+        img.src = "logo2b.png";
+        img.alt = item.name;
+        img.className = "item-image";
+
+        const details = document.createElement("div");
+        details.className = "item-details";
+        details.innerHTML = `
+          <div class="item-name">${item.name || "商品"}</div>
+          <div class="item-price">$${item.price || 0}</div>
+        `;
+
+        // Purchase button (bigger)
+        const btn = document.createElement("button");
+        btn.className = "item-btn";
+        btn.textContent = "購買";
+        btn.style.fontSize = "20px";
+        btn.style.padding = "12px 24px";
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          handleAdd();
+        };
+
+        card.style.display = "flex";
+        card.style.flexDirection = "row";
+        card.style.alignItems = "center";
+        card.style.justifyContent = "space-between";
+
+        card.appendChild(img);
+        card.appendChild(details);
+        card.appendChild(btn);
+
+        // --- Controls (outside card, but next to it) ---
+        if (window.itemAmounts[item.id] === undefined) window.itemAmounts[item.id] = item.price;
+        if (window.itemNotes[item.id] === undefined) window.itemNotes[item.id] = "";
+
+        const controlsBox = document.createElement("div");
+        controlsBox.style.display = "flex";
+        controlsBox.style.flexDirection = "column";
+        controlsBox.style.alignItems = "flex-end";
+        controlsBox.style.justifyContent = "center";
+        controlsBox.style.gap = "8px";
+        controlsBox.style.minWidth = "140px";
+        controlsBox.style.maxWidth = "180px";
+        controlsBox.style.background = "#232323";
+        controlsBox.style.borderRadius = "8px";
+        controlsBox.style.padding = "8px 8px";
+
+        const noteInput = document.createElement("input");
+        noteInput.type = "text";
+        noteInput.placeholder = "備註";
+        noteInput.value = window.itemNotes[item.id] || "";
+        noteInput.className = "item-note-input";
+        noteInput.oninput = (e) => {
+          window.itemNotes[item.id] = e.target.value;
+        };
+
+        const amountRow = document.createElement("div");
+        amountRow.style.display = "flex";
+        amountRow.style.alignItems = "center";
+        amountRow.style.gap = "8px";
+
+        const minusBtn = document.createElement("button");
+        minusBtn.textContent = "-$5";
+        minusBtn.className = "item-btn item-plus-btn";
+        minusBtn.onclick = (e) => {
+          e.stopPropagation();
+          window.itemAmounts[item.id] = Math.max(0, (window.itemAmounts[item.id] || item.price) - 5);
+          renderItems();
+        };
+
+        const amountInput = document.createElement("input");
+        amountInput.type = "number";
+        amountInput.className = "item-amount-input";
+        amountInput.value = window.itemAmounts[item.id] || item.price;
+        amountInput.min = 0;
+        amountInput.style.width = "60px";
+        amountInput.style.fontSize = "18px";
+        amountInput.style.padding = "6px 4px";
+        amountInput.style.borderRadius = "6px";
+        amountInput.style.border = "1.5px solid #4CAF50";
+        amountInput.style.background = "#222";
+        amountInput.style.color = "#4CAF50";
+        amountInput.style.textAlign = "center";
+        amountInput.oninput = (e) => {
+          let val = parseInt(e.target.value);
+          if (isNaN(val) || val < 0) val = 0;
+          window.itemAmounts[item.id] = val;
+        };
+
+        const plusBtn = document.createElement("button");
+        plusBtn.textContent = "+$5";
+        plusBtn.className = "item-btn item-plus-btn";
+        plusBtn.onclick = (e) => {
+          e.stopPropagation();
+          window.itemAmounts[item.id] = (window.itemAmounts[item.id] || item.price) + 5;
+          renderItems();
+        };
+
+        amountRow.appendChild(minusBtn);
+        amountRow.appendChild(amountInput);
+        amountRow.appendChild(plusBtn);
+
+        controlsBox.appendChild(noteInput);
+        controlsBox.appendChild(amountRow);
+
+        // Card click: add to cart with note and temp amount
+        function handleAdd() {
+          addToCart({
+            name: item.name,
+            price: window.itemAmounts[item.id] || item.price,
+            id: item.id,
+            note: window.itemNotes[item.id] || ""
+          });
+          // Reset note and amount after purchase
+          window.itemNotes[item.id] = "";
+          window.itemAmounts[item.id] = item.price;
+          renderItems();
         }
-      });
+        card.addEventListener("click", (e) => {
+          if (e.target === card || e.target === img || e.target === details) {
+            handleAdd();
+          }
+        });
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleAdd();
+          }
+        });
 
-      const data = await res.json();
-      document.getElementById("count").innerText = data.count;
+        row.appendChild(card);
+        row.appendChild(controlsBox);
+        itemsGrid.appendChild(row);
+      });
     }
 
+    function addToCart(item) {
+      const existingItem = cart.find(c => c.id === item.id && c.note === (item.note || "") && c.price === item.price);
+
+      if (existingItem) {
+        existingItem.qty += 1;
+      } else {
+        cart.push({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          qty: 1,
+          note: item.note || ""
+        });
+      }
+
+      updateCartDisplay();
+    }
+
+    function removeFromCart(itemId) {
+      // Support note and price as keys
+      if (arguments.length > 1) {
+        const note = arguments[1] || "";
+        const price = arguments[2];
+        cart = cart.filter(item => !(item.id === itemId && item.note === note && item.price === price));
+      } else {
+        cart = cart.filter(item => item.id !== itemId);
+      }
+      updateCartDisplay();
+    }
+
+    function updateCartDisplay() {
+      const cartItems = document.getElementById("cartItems");
+      const totalAmount = document.getElementById("totalAmount");
+
+      cartItems.innerHTML = "";
+
+      let total = 0;
+
+      cart.forEach(item => {
+        const itemTotal = item.price * item.qty;
+        total += itemTotal;
+
+        const cartItem = document.createElement("div");
+        cartItem.className = "cart-item";
+
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "cart-item-name";
+        nameSpan.textContent = item.name;
+
+        // Show note (if any)
+        const noteSpan = document.createElement("span");
+        noteSpan.className = "cart-item-note";
+        noteSpan.style.fontSize = "13px";
+        noteSpan.style.color = "#aaa";
+        noteSpan.style.marginLeft = "8px";
+        noteSpan.textContent = item.note ? `(${item.note})` : "";
+
+        // Show star if temp amount is used (not original price)
+        const tempAmountSpan = document.createElement("span");
+        tempAmountSpan.className = "cart-item-temp-amount";
+        tempAmountSpan.style.fontSize = "18px";
+        tempAmountSpan.style.color = "#FFD700";
+        tempAmountSpan.style.marginLeft = "8px";
+        tempAmountSpan.textContent = (item.price !== (allItems.find(i => i.id === item.id)?.price)) ? "★" : "";
+
+        // Show quantity as plain text (not editable)
+        const qtyContainer = document.createElement("div");
+        qtyContainer.className = "cart-item-qty-container";
+        qtyContainer.style.fontSize = "16px";
+        qtyContainer.style.fontWeight = "bold";
+        qtyContainer.style.color = "#4CAF50";
+        qtyContainer.textContent = `x${item.qty}`;
+
+        const priceSpan = document.createElement("span");
+        priceSpan.className = "cart-item-price";
+        priceSpan.textContent = "$" + itemTotal;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "cart-item-remove";
+        removeBtn.textContent = "刪除";
+        removeBtn.onclick = () => removeFromCart(item.id, item.note, item.price);
+
+        cartItem.appendChild(nameSpan);
+        cartItem.appendChild(noteSpan);
+        cartItem.appendChild(tempAmountSpan);
+        cartItem.appendChild(qtyContainer);
+        cartItem.appendChild(priceSpan);
+        cartItem.appendChild(removeBtn);
+        cartItems.appendChild(cartItem);
+      });
+
+      totalAmount.textContent = "$" + total;
+    }
+
+    function updateItemQty(itemId, newQty) {
+      // Support note and price as keys
+      if (arguments.length > 2) {
+        const note = arguments[2] || "";
+        const price = arguments[3];
+        const item = cart.find(c => c.id === itemId && c.note === note && c.price === price);
+        if (item && newQty > 0) {
+          item.qty = newQty;
+          updateCartDisplay();
+        }
+      } else {
+        const item = cart.find(c => c.id === itemId);
+        if (item && newQty > 0) {
+          item.qty = newQty;
+          updateCartDisplay();
+        }
+      }
+    }
+
+    function clearCart() {
+      // Show custom modal instead of browser confirm
+      document.getElementById('clearCartModal').style.display = 'flex';
+      // Handler for confirm
+      document.getElementById('clearCartConfirmBtn').onclick = function() {
+        cart = [];
+        if (window.itemNotes) {
+          Object.keys(window.itemNotes).forEach(id => window.itemNotes[id] = "");
+        }
+        if (window.itemAmounts && allItems) {
+          allItems.forEach(item => {
+            window.itemAmounts[item.id] = item.price;
+          });
+        }
+        updateCartDisplay();
+        renderItems();
+        document.getElementById('clearCartModal').style.display = 'none';
+      };
+      // Handler for cancel
+      document.getElementById('clearCartCancelBtn').onclick = function() {
+        document.getElementById('clearCartModal').style.display = 'none';
+      };
+    }
 
     function logout() {
       localStorage.removeItem("sessionToken");
       sessionToken = null;
+      cart = [];
       showLogin();
+      document.getElementById("pin").value = "";
     }
 
     // 頁面一開啟自動判斷是否已登入
-    // 頁面一開啟自動判斷是否已登入（正確版）
     const token = localStorage.getItem("sessionToken");
 
     if (token) {
       showApp();
-      loadCount();
+      loadItems();
     } else {
       showLogin();
     }
