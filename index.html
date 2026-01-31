@@ -473,6 +473,15 @@
 </head>
 
 <body>
+      <!-- Custom Modal for Purchase Success -->
+      <div id="purchaseSuccessModal" style="display:none;position:fixed;z-index:1000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.45);justify-content:center;align-items:center;">
+        <div style="background:#232323;padding:32px 24px;border-radius:16px;box-shadow:0 4px 32px #0008;min-width:280px;text-align:center;">
+          <div style="font-size:22px;font-weight:bold;margin-bottom:18px;color:#fff;">結帳成功！</div>
+          <div style="display:flex;gap:18px;justify-content:center;">
+            <button id="purchaseSuccessOkBtn" style="padding:12px 28px;font-size:18px;border-radius:8px;border:none;background:orange;color:#fff;cursor:pointer;">確定</button>
+          </div>
+        </div>
+      </div>
     <!-- Custom Modal for Purchase Confirmation -->
     <div id="purchaseModal" style="display:none;position:fixed;z-index:1000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.45);justify-content:center;align-items:center;">
       <div style="background:#232323;padding:32px 24px;border-radius:16px;box-shadow:0 4px 32px #0008;min-width:280px;text-align:center;">
@@ -569,9 +578,13 @@
               });
               const data = await res.json();
               if (data.status === "ok") {
-                alert("結帳成功！");
                 cart = [];
                 updateCartDisplay();
+                // Show custom purchase success modal
+                document.getElementById('purchaseSuccessModal').style.display = 'flex';
+                document.getElementById('purchaseSuccessOkBtn').onclick = function() {
+                  document.getElementById('purchaseSuccessModal').style.display = 'none';
+                };
               } else {
                 alert("結帳失敗：" + (data.error || "未知錯誤"));
               }
