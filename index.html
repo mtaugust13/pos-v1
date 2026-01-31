@@ -473,6 +473,16 @@
 </head>
 
 <body>
+    <!-- Custom Modal for Purchase Confirmation -->
+    <div id="purchaseModal" style="display:none;position:fixed;z-index:1000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.45);justify-content:center;align-items:center;">
+      <div style="background:#232323;padding:32px 24px;border-radius:16px;box-shadow:0 4px 32px #0008;min-width:280px;text-align:center;">
+        <div style="font-size:22px;font-weight:bold;margin-bottom:18px;color:#fff;">確定要結帳嗎？</div>
+        <div style="display:flex;gap:18px;justify-content:center;">
+          <button id="purchaseCancelBtn" style="padding:12px 28px;font-size:18px;border-radius:8px;border:none;background:#555;color:#fff;cursor:pointer;">取消</button>
+          <button id="purchaseConfirmBtn" style="padding:12px 28px;font-size:18px;border-radius:8px;border:none;background:orange;color:#fff;cursor:pointer;">結帳</button>
+        </div>
+      </div>
+    </div>
   <!-- Custom Modal for Clear Cart Confirmation -->
   <div id="clearCartModal" style="display:none;position:fixed;z-index:1000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.45);justify-content:center;align-items:center;">
     <div style="background:#232323;padding:32px 24px;border-radius:16px;box-shadow:0 4px 32px #0008;min-width:280px;text-align:center;">
@@ -538,33 +548,42 @@
           if (logoutBtn) logoutBtn.onclick = logout;
         });
 
-        // Purchase function: send cart to backend and handle response
-        async function purchaseCart() {
+        // Purchase function: show custom modal for confirmation
+        function purchaseCart() {
           if (!cart.length) {
             alert('購物車是空的');
             return;
           }
-          const token = localStorage.getItem("sessionToken");
-          try {
-            const res = await fetch(API_URL, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-session-token": token
-              },
-              body: JSON.stringify({ cart })
-            });
-            const data = await res.json();
-            if (data.status === "ok") {
-              alert("結帳成功！");
-              cart = [];
-              updateCartDisplay();
-            } else {
-              alert("結帳失敗：" + (data.error || "未知錯誤"));
+          document.getElementById('purchaseModal').style.display = 'flex';
+          // Handler for confirm
+          document.getElementById('purchaseConfirmBtn').onclick = async function() {
+            const token = localStorage.getItem("sessionToken");
+            try {
+              const res = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "x-session-token": token
+                },
+                body: JSON.stringify({ cart })
+              });
+              const data = await res.json();
+              if (data.status === "ok") {
+                alert("結帳成功！");
+                cart = [];
+                updateCartDisplay();
+              } else {
+                alert("結帳失敗：" + (data.error || "未知錯誤"));
+              }
+            } catch (e) {
+              alert("結帳失敗：伺服器錯誤");
             }
-          } catch (e) {
-            alert("結帳失敗：伺服器錯誤");
-          }
+            document.getElementById('purchaseModal').style.display = 'none';
+          };
+          // Handler for cancel
+          document.getElementById('purchaseCancelBtn').onclick = function() {
+            document.getElementById('purchaseModal').style.display = 'none';
+          };
         }
     /***** 你只需要改這一行 *****/
     const API_URL = "https://pos-v1-api-1077804657394.asia-east1.run.app"; // ← 改成你的
