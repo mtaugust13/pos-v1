@@ -538,9 +538,33 @@
           if (logoutBtn) logoutBtn.onclick = logout;
         });
 
-        // Dummy purchaseCart function (to be implemented)
-        function purchaseCart() {
-          alert('結帳功能尚未實作');
+        // Purchase function: send cart to backend and handle response
+        async function purchaseCart() {
+          if (!cart.length) {
+            alert('購物車是空的');
+            return;
+          }
+          const token = localStorage.getItem("sessionToken");
+          try {
+            const res = await fetch(API_URL, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-session-token": token
+              },
+              body: JSON.stringify({ cart })
+            });
+            const data = await res.json();
+            if (data.status === "ok") {
+              alert("結帳成功！");
+              cart = [];
+              updateCartDisplay();
+            } else {
+              alert("結帳失敗：" + (data.error || "未知錯誤"));
+            }
+          } catch (e) {
+            alert("結帳失敗：伺服器錯誤");
+          }
         }
     /***** 你只需要改這一行 *****/
     const API_URL = "https://pos-v1-api-1077804657394.asia-east1.run.app"; // ← 改成你的
