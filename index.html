@@ -55,7 +55,7 @@
       }
     </style>
   <meta charset="UTF-8">
-  <title>POS Counter</title>
+  <title>八月十三</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- iOS 加入主畫面 -->
@@ -126,7 +126,7 @@
       opacity: 0.8;
     }
 
-    /* Main App Layout - 2 Columns */
+    /* Main App Layout - 3 Columns */
     #app {
       display: none;
       width: 100%;
@@ -135,14 +135,32 @@
       gap: 0;
     }
 
-    /* Left Section - Cart (30%) */
+    /* Left Section - Cart (25%) */
     .cart-section {
-      width: 30%;
+      width: 25%;
       background: #1a1a1a;
       border-right: 2px solid #333;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      margin-top: 52px;
+    }
+
+    /* Top Header Row - 1st Row */
+    .top-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 52px;
+      background: #2a2a2a;
+      border-bottom: 2px solid #333;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 0 24px;
+      gap: 12px;
+      z-index: 99;
     }
 
     .cart-header {
@@ -315,13 +333,40 @@
       opacity: 0.8;
     }
 
-    /* Right Section - Sales Items (70%) */
+    /* Middle Section - Sales Items (50%) */
     .items-section {
-      width: 70%;
+      width: 50%;
       background: #111;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      border-right: 2px solid #333;
+      margin-top: 52px;
+    }
+
+    /* Right Section - Purchased List (25%) */
+    .purchased-section-column {
+      width: 25%;
+      background: #1a1a1a;
+      border-left: 2px solid #333;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin-top: 52px;
+    }
+
+    .purchased-section-column .purchased-header {
+      padding: 16px;
+      background: #2a2a2a;
+      border-bottom: 2px solid #333;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .purchased-section-column .purchased-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
     }
 
     .items-header {
@@ -335,28 +380,29 @@
     .items-grid {
       flex: 1;
       overflow-y: auto;
+      overflow-x: hidden;
       padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      align-items: flex-start;
+      align-items: stretch;
     }
 
     .item-card {
       background: #2a2a2a;
       border-radius: 8px;
-      padding: 12px;
+      padding: 8px;
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
       text-align: left;
-      gap: 12px;
+      gap: 8px;
       cursor: pointer;
       transition: transform 0.2s, background 0.2s;
       border: 2px solid #333;
-      width: 66.67%;
-      max-width: 460px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .item-card:active {
@@ -367,7 +413,7 @@
     .item-image {
       width: 100px;
       height: 100px;
-      object-fit: cover;
+      object-fit: contain;
       border-radius: 6px;
       flex-shrink: 0;
     }
@@ -503,6 +549,25 @@
     </div>
   </div>
 
+  <!-- Custom Modal for Today's Sales Summary -->
+  <div id="todaysSalesModal" style="display:none;position:fixed;z-index:1000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.45);justify-content:center;align-items:center;">
+    <div style="background:#232323;padding:24px;border-radius:16px;box-shadow:0 4px 32px #0008;min-width:400px;max-height:70vh;display:flex;flex-direction:column;">
+      <div style="font-size:22px;font-weight:bold;margin-bottom:12px;color:#FFD700;text-align:center;">今日銷售統計</div>
+      <div style="border-bottom:2px solid #333;margin-bottom:12px;padding-bottom:12px;">
+        <div style="font-size:14px;color:#999;text-align:right;">日期: <span id="todayDateDisplay"></span></div>
+      </div>
+      
+      <!-- Scrollable container: Total Amount + Summary + Detail List -->
+      <div id="todaysSalesListContainer" style="flex:1;overflow-y:auto;padding-right:6px;">
+        <div style="text-align:center;color:#999;">載入中...</div>
+      </div>
+      
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:16px;">
+        <button id="todaysSalesCloseBtn" style="padding:12px 28px;font-size:16px;border-radius:8px;border:none;background:#555;color:#fff;cursor:pointer;">關閉</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 登入畫面 -->
   <div id="login">
     <div class="login-box">
@@ -512,6 +577,7 @@
         id="pin"
         inputmode="numeric"
         placeholder="****"
+        onkeypress="if(event.key==='Enter') login()"
       >
       <button onclick="login()">登入</button>
     </div>
@@ -519,11 +585,14 @@
 
   <!-- 主畫面 - iPad 雙欄版 -->
   <div id="app">
-    <!-- Top right logout button -->
-    <button id="logoutTopRight" class="btn-logout" style="position:fixed;top:8px;right:24px;z-index:100;min-width:90px;font-size:18px;padding:12px 20px;height:52px;display:flex;align-items:center;justify-content:center;line-height:28px;">登出</button>
+    <!-- Top Header Row (1st Row) - Light Gray Background -->
+    <div class="top-header">
+      <button id="todaysSalesBtn" class="btn-sales" style="min-width:90px;font-size:18px;padding:12px 20px;height:52px;display:flex;align-items:center;justify-content:center;line-height:28px;background:#FFD700;color:#000;border:none;border-radius:6px;cursor:pointer;font-weight:bold;">今日銷售</button>
+      <button id="logoutTopRight" class="btn-logout" style="min-width:90px;font-size:18px;padding:12px 20px;height:52px;display:flex;align-items:center;justify-content:center;line-height:28px;background:#f44336;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:bold;">登出</button>
+    </div>
     <!-- 左欄 (30%) - 購物車 -->
     <div class="cart-section">
-      <div class="cart-header">🛒 購物車</div>
+      <div class="cart-header">購物車</div>
       
       <div class="cart-items" id="cartItems">
         <!-- 購物車項目會動態加入這裡 -->
@@ -541,21 +610,188 @@
       </div>
     </div>
 
-    <!-- 右欄 (70%) - 銷售商品 -->
-    <div class="items-section" style="width:70%;">
-      <div class="items-header">📦 商品列表</div>
+    <!-- 中欄 (50%) - 銷售商品 -->
+    <div class="items-section">
+      <div class="items-header">商品列表</div>
       <div class="items-grid" id="itemsGrid">
         <!-- 商品卡片會動態加入這裡 -->
       </div>
     </div>
+
+    <!-- 右欄 (25%) - 已購清單 -->
+    <div class="purchased-section-column">
+      <div class="purchased-header">已購清單</div>
+      <div class="purchased-list" id="purchasedList">
+        <!-- 已購項目會動態加入這裡 -->
+      </div>
+    </div>
   </div>
+
+  <style>
+    .purchased-section {
+      background: #181818;
+      border-top: 2px solid #333;
+      padding: 12px 16px 16px 16px;
+      min-height: 80px;
+      max-height: 220px;
+      overflow-y: auto;
+      display: none;
+    }
+    .purchased-header {
+      font-size: 18px;
+      font-weight: bold;
+      color: #FFD700;
+      margin-bottom: 8px;
+    }
+    .purchased-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .purchased-item {
+      background: #232323;
+      border-radius: 6px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 15px;
+      color: #fff;
+      box-shadow: 0 2px 8px #0002;
+    }
+    .purchased-item .cross-btn {
+      color: #f44336;
+      font-size: 20px;
+      font-weight: bold;
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-left: 12px;
+      padding: 0 6px;
+      line-height: 1;
+    }
+  </style>
 
   <script>
         // Move logout logic to top right button
         document.addEventListener('DOMContentLoaded', function() {
           var logoutBtn = document.getElementById('logoutTopRight');
           if (logoutBtn) logoutBtn.onclick = logout;
+          
+          // Setup today's sales button
+          var todaysSalesBtn = document.getElementById('todaysSalesBtn');
+          if (todaysSalesBtn) todaysSalesBtn.onclick = showTodaysSales;
+          
+          // Setup close button for sales modal
+          var closeBtn = document.getElementById('todaysSalesCloseBtn');
+          if (closeBtn) closeBtn.onclick = function() {
+            document.getElementById('todaysSalesModal').style.display = 'none';
+          };
         });
+
+        // Function to show today's sales summary
+        async function showTodaysSales() {
+          const token = localStorage.getItem("sessionToken");
+          if (!token) {
+            alert('未登入');
+            return;
+          }
+          
+          // Show loading state
+          document.getElementById('todaysSalesModal').style.display = 'flex';
+          document.getElementById('todaysSalesListContainer').innerHTML = '<div style="text-align:center;color:#999;">載入中...</div>';
+          
+          // Set today's date display
+          const today = new Date();
+          const dateStr = today.getFullYear() + '-' + 
+                         String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                         String(today.getDate()).padStart(2, '0');
+          document.getElementById('todayDateDisplay').textContent = dateStr;
+          
+          try {
+            // Fetch today's sales from API
+            const res = await fetch(API_URL + '?todaySales=1', {
+              method: 'GET',
+              headers: {
+                'x-session-token': token
+              }
+            });
+            
+            const data = await res.json();
+            
+            if (data.status === 'ok' && data.sales && Array.isArray(data.sales)) {
+              let totalAmount = 0;
+              const salesList = data.sales;
+              
+              // Step 1: Group by item name and calculate counts/totals
+              const itemSummary = {};
+              salesList.forEach((item) => {
+                const itemName = item.name || '商品';
+                const itemPrice = item.price || 0;
+                totalAmount += itemPrice;
+                
+                if (!itemSummary[itemName]) {
+                  itemSummary[itemName] = {
+                    count: 0,
+                    totalPrice: 0,
+                    name: itemName
+                  };
+                }
+                itemSummary[itemName].count += 1;
+                itemSummary[itemName].totalPrice += itemPrice;
+              });
+              
+              // Step 2: Build total amount display
+              let html = '<div style="background:#1f1f1f;border-radius:6px;padding:16px;margin-bottom:12px;border:1px solid #444;text-align:center;">';
+              html += '<div style="font-size:14px;color:#999;margin-bottom:6px;">總金額</div>';
+              html += '<div style="font-size:32px;color:#FFD700;font-weight:bold;">$' + totalAmount + '</div>';
+              html += '</div>';
+              
+              // Step 3: Build summary HTML (grouped items)
+              html += '<div style="background:#1f1f1f;border-radius:6px;padding:12px;margin-bottom:12px;border:1px solid #444;">';
+              html += '<div style="font-size:14px;font-weight:bold;color:#FFD700;margin-bottom:10px;">商品統計</div>';
+              
+              Object.values(itemSummary).forEach((summary) => {
+                html += `<div style="background:#2a2a2a;border-radius:6px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+                  <div style="flex:1;color:#fff;font-size:14px;">
+                    <div>${summary.name} × ${summary.count}</div>
+                  </div>
+                  <div style="color:#FFD700;font-weight:bold;font-size:14px;">$${summary.totalPrice}</div>
+                </div>`;
+              });
+              
+              html += '</div>';
+              
+              // Step 4: Build detail list HTML
+              html += '<div style="border-top:1px solid #444;padding-top:12px;">';
+              html += '<div style="font-size:14px;font-weight:bold;color:#999;margin-bottom:10px;">購買明細</div>';
+              
+              salesList.forEach((item, index) => {
+                const itemPrice = item.price || 0;
+                const itemName = item.name || '商品 ' + (index + 1);
+                const itemNote = item.note ? ` (${item.note})` : '';
+                const timestamp = item.timestamp ? item.timestamp.split(' ').slice(1).join(' ') : '';
+                
+                html += `<div style="background:#2a2a2a;border-radius:6px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+                  <div style="flex:1;color:#fff;font-size:13px;">
+                    <div>${itemName}${itemNote}</div>
+                    <div style="color:#999;font-size:12px;margin-top:2px;">${timestamp}</div>
+                  </div>
+                  <div style="color:#FFD700;font-weight:bold;font-size:13px;">$${itemPrice}</div>
+                </div>`;
+              });
+              
+              html += '</div>';
+              
+              document.getElementById('todaysSalesListContainer').innerHTML = html || '<div style="text-align:center;color:#999;">今天還沒有銷售</div>';
+            } else {
+              document.getElementById('todaysSalesListContainer').innerHTML = '<div style="text-align:center;color:#999;">今天還沒有銷售</div>';
+            }
+          } catch (e) {
+            console.error('Error fetching today sales:', e);
+            document.getElementById('todaysSalesListContainer').innerHTML = '<div style="text-align:center;color:#f44336;">無法載入資料</div>';
+          }
+        }
 
         // Purchase function: show custom modal for confirmation
         function purchaseCart() {
@@ -578,13 +814,13 @@
               });
               const data = await res.json();
               if (data.status === "ok") {
+                // Add purchased items to purchased list (deep copy)
+                cart.forEach(item => {
+                  purchased.push({ ...item });
+                });
+                updatePurchasedDisplay();
                 cart = [];
                 updateCartDisplay();
-                // Show custom purchase success modal
-                document.getElementById('purchaseSuccessModal').style.display = 'flex';
-                document.getElementById('purchaseSuccessOkBtn').onclick = function() {
-                  document.getElementById('purchaseSuccessModal').style.display = 'none';
-                };
               } else {
                 alert("結帳失敗：" + (data.error || "未知錯誤"));
               }
@@ -605,6 +841,7 @@
     let sessionToken = localStorage.getItem("sessionToken");
     let cart = []; // 購物車陣列
     let allItems = []; // 所有商品
+    let purchased = []; // 已購清單
 
     function showLogin() {
       document.getElementById("login").style.display = "flex";
@@ -643,12 +880,11 @@
 
       // 6 個範例商品
       allItems = [
-        { id: 1, name: "咖啡", price: 45 },
-        { id: 2, name: "美式咖啡", price: 50 },
-        { id: 3, name: "拿鐵", price: 60 },
-        { id: 4, name: "卡布奇諾", price: 60 },
-        { id: 5, name: "抹茶拿鐵", price: 65 },
-        { id: 6, name: "牛奶茶", price: 50 }
+        { id: 1, name: "人生美式", price: 100 },
+        { id: 2, name: "幸運拿鐵", price: 130 },
+        { id: 3, name: "命運手沖", price: 130 },
+        { id: 4, name: "大馬恐龍美祿", price: 120 },
+        { id: 5, name: "貓掌冰磚咖啡", price: 200 }
       ];
 
       renderItems();
@@ -677,7 +913,7 @@
       const itemsGrid = document.getElementById("itemsGrid");
       itemsGrid.innerHTML = "";
 
-      const items = allItems.slice(0, 6);
+      const items = allItems; // Show all items
 
       // Store temp note and amount for each item
       if (!window.itemNotes) window.itemNotes = {};
@@ -739,12 +975,12 @@
         controlsBox.style.flexDirection = "column";
         controlsBox.style.alignItems = "flex-end";
         controlsBox.style.justifyContent = "center";
-        controlsBox.style.gap = "8px";
+        controlsBox.style.gap = "12px";
         controlsBox.style.minWidth = "140px";
         controlsBox.style.maxWidth = "180px";
         controlsBox.style.background = "#232323";
         controlsBox.style.borderRadius = "8px";
-        controlsBox.style.padding = "8px 8px";
+        controlsBox.style.padding = "12px";
 
         const noteInput = document.createElement("input");
         noteInput.type = "text";
@@ -758,11 +994,27 @@
         const amountRow = document.createElement("div");
         amountRow.style.display = "flex";
         amountRow.style.alignItems = "center";
-        amountRow.style.gap = "8px";
+        amountRow.style.justifyContent = "space-between";
+        amountRow.style.gap = "4px";
+        amountRow.style.background = "#333";
+        amountRow.style.border = "1.5px solid #4CAF50";
+        amountRow.style.borderRadius = "6px";
+        amountRow.style.padding = "4px 6px";
+        amountRow.style.width = "100%";
+        amountRow.style.boxSizing = "border-box";
 
         const minusBtn = document.createElement("button");
-        minusBtn.textContent = "-$5";
+        minusBtn.textContent = "-5";
         minusBtn.className = "item-btn item-plus-btn";
+        minusBtn.style.padding = "3px 5px";
+        minusBtn.style.fontSize = "11px";
+        minusBtn.style.marginLeft = "0px";
+        minusBtn.style.background = "#4CAF50";
+        minusBtn.style.color = "#fff";
+        minusBtn.style.border = "none";
+        minusBtn.style.borderRadius = "4px";
+        minusBtn.style.cursor = "pointer";
+        minusBtn.style.fontWeight = "bold";
         minusBtn.onclick = (e) => {
           e.stopPropagation();
           window.itemAmounts[item.id] = Math.max(0, (window.itemAmounts[item.id] || item.price) - 5);
@@ -774,11 +1026,11 @@
         amountInput.className = "item-amount-input";
         amountInput.value = window.itemAmounts[item.id] || item.price;
         amountInput.min = 0;
-        amountInput.style.width = "60px";
-        amountInput.style.fontSize = "18px";
-        amountInput.style.padding = "6px 4px";
-        amountInput.style.borderRadius = "6px";
-        amountInput.style.border = "1.5px solid #4CAF50";
+        amountInput.style.width = "45px";
+        amountInput.style.fontSize = "13px";
+        amountInput.style.padding = "3px 2px";
+        amountInput.style.borderRadius = "4px";
+        amountInput.style.border = "1px solid #4CAF50";
         amountInput.style.background = "#222";
         amountInput.style.color = "#4CAF50";
         amountInput.style.textAlign = "center";
@@ -789,8 +1041,17 @@
         };
 
         const plusBtn = document.createElement("button");
-        plusBtn.textContent = "+$5";
+        plusBtn.textContent = "+5";
         plusBtn.className = "item-btn item-plus-btn";
+        plusBtn.style.padding = "3px 5px";
+        plusBtn.style.fontSize = "11px";
+        plusBtn.style.marginLeft = "0px";
+        plusBtn.style.background = "#4CAF50";
+        plusBtn.style.color = "#fff";
+        plusBtn.style.border = "none";
+        plusBtn.style.borderRadius = "4px";
+        plusBtn.style.cursor = "pointer";
+        plusBtn.style.fontWeight = "bold";
         plusBtn.onclick = (e) => {
           e.stopPropagation();
           window.itemAmounts[item.id] = (window.itemAmounts[item.id] || item.price) + 5;
@@ -798,6 +1059,16 @@
         };
 
         amountRow.appendChild(minusBtn);
+        
+        // Add $ symbol label
+        const dollarLabel = document.createElement("span");
+        dollarLabel.textContent = "$";
+        dollarLabel.style.color = "#4CAF50";
+        dollarLabel.style.fontSize = "12px";
+        dollarLabel.style.fontWeight = "bold";
+        dollarLabel.style.marginRight = "2px";
+        amountRow.appendChild(dollarLabel);
+        
         amountRow.appendChild(amountInput);
         amountRow.appendChild(plusBtn);
 
@@ -954,6 +1225,7 @@
       // Handler for confirm
       document.getElementById('clearCartConfirmBtn').onclick = function() {
         cart = [];
+        // Do NOT clear purchased!
         if (window.itemNotes) {
           Object.keys(window.itemNotes).forEach(id => window.itemNotes[id] = "");
         }
@@ -972,6 +1244,26 @@
       };
     }
 
+    function updatePurchasedDisplay() {
+      const purchasedList = document.getElementById('purchasedList');
+      purchasedList.innerHTML = '';
+      purchased.forEach((item, idx) => {
+        const el = document.createElement('div');
+        el.className = 'purchased-item';
+        el.innerHTML = `
+          <span>${item.name} x${item.qty} <span style="color:#4CAF50;">$${item.price * item.qty}</span> ${item.note ? `<span style='color:#aaa;font-size:13px;'>(${item.note})</span>` : ''}</span>
+          <button class="cross-btn" title="完成/刪除" onclick="removePurchased(${idx})">×</button>
+        `;
+        purchasedList.appendChild(el);
+      });
+    }
+
+    // Remove purchased item by index
+    function removePurchased(idx) {
+      purchased.splice(idx, 1);
+      updatePurchasedDisplay();
+    }
+
     function logout() {
       localStorage.removeItem("sessionToken");
       sessionToken = null;
@@ -983,9 +1275,13 @@
     // 頁面一開啟自動判斷是否已登入
     const token = localStorage.getItem("sessionToken");
 
+    // Expose removePurchased globally for inline onclick
+    window.removePurchased = removePurchased;
+
     if (token) {
       showApp();
       loadItems();
+      updatePurchasedDisplay();
     } else {
       showLogin();
     }
