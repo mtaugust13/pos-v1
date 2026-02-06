@@ -209,6 +209,10 @@
       overflow-y: auto;
       overflow-x: hidden;
       padding: 12px;
+      background-image: url("sita.png");
+      background-repeat: no-repeat;
+      background-position: left +5px bottom;
+      background-size: auto 120px;
     }
 
     .cart-item {
@@ -327,7 +331,7 @@
     }
 
     .cart-item-price-temp {
-      color: #B8860B;
+      color: #d6797f;
     }
 
     .cross-btn {
@@ -454,6 +458,10 @@
       overflow-y: auto;
       overflow-x: hidden;
       padding: 12px;
+      background-image: url("spyb.png");
+      background-repeat: no-repeat;
+      background-position: right -40px bottom;
+      background-size: auto 120px;
     }
 
     .items-header {
@@ -546,6 +554,8 @@
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
+      align-self: center;
+      transform: translateY(-5px);
     }
     .top-header button {
       font-size: var(--font-md) !important;
@@ -749,6 +759,7 @@
       align-items: center;
       justify-content: space-between;
       font-size: 15px;
+      font-weight: bold;
       color: #D4AF37;
       box-shadow: 0 2px 8px #0002;
       border: 1px solid #1a2d4a;
@@ -1048,8 +1059,8 @@
         const btn = document.createElement("button");
         btn.className = "item-btn";
         btn.textContent = "購買";
-        btn.style.fontSize = "20px";
-        btn.style.padding = "12px 24px";
+        btn.style.fontSize = "15px";
+        btn.style.padding = "10px 20px";
         btn.onclick = (e) => {
           e.stopPropagation();
           handleAdd();
