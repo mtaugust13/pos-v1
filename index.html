@@ -32,6 +32,10 @@
         background: #0B1929;
         color: #D4AF37;
       }
+      .item-note-input::placeholder {
+        color: #d4d1cd;
+        opacity: 1;
+      }
       .item-amount-input {
         width: 60px;
         font-size: var(--font-md);
@@ -212,7 +216,7 @@
       background-image: url("sita.png");
       background-repeat: no-repeat;
       background-position: left +5px bottom;
-      background-size: auto 120px;
+      background-size: auto 160px;
     }
 
     .cart-item {
@@ -239,7 +243,7 @@
     .cart-item-right {
       display: flex;
       align-items: flex-end;
-      gap: 8px;
+      gap: 2px;
       flex: 0 0 auto;
       flex-shrink: 0;
       margin-left: auto;
@@ -323,15 +327,16 @@
 
     .cart-item-price {
       text-align: right;
-      min-width: 0;
+      min-width: 56px;
       flex: 0 0 auto;
       font-size: var(--font-md);
       font-weight: bold;
       color: #D4AF37;
+      font-variant-numeric: tabular-nums;
     }
 
     .cart-item-price-temp {
-      color: #d6797f;
+      color: #d4d1cd;
     }
 
     .cross-btn {
@@ -351,7 +356,7 @@
     }
 
     .cart-footer {
-      padding: 16px;
+      padding: 16px 16px 36px;
       background: #1a3050;
       border-top: 2px solid #D4AF37;
     }
@@ -480,7 +485,7 @@
       padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 6px;
       align-items: stretch;
     }
 
@@ -689,7 +694,7 @@
   <div id="app">
     <!-- Top Header Row (1st Row) - Light Gray Background -->
     <div class="top-header">
-      <img class="top-header-logo" src="title.png" alt="">
+      <img class="top-header-logo" src="Title.png" alt="">
       <button id="todaysSalesBtn" class="btn-sales" style="min-width:90px;font-size:18px;padding:12px 20px;height:52px;display:flex;align-items:center;justify-content:center;line-height:28px;background:#D4AF37;color:#0B1929;border:none;border-radius:6px;cursor:pointer;font-weight:bold;">今日銷售</button>
       <button id="logoutTopRight" class="btn-logout" style="min-width:90px;font-size:18px;padding:12px 20px;height:52px;display:flex;align-items:center;justify-content:center;line-height:28px;background:#C41E3A;color:#D4AF37;border:none;border-radius:6px;cursor:pointer;font-weight:bold;">登出</button>
     </div>
@@ -1094,7 +1099,7 @@
 
         const noteInput = document.createElement("input");
         noteInput.type = "text";
-        noteInput.placeholder = "備註";
+        noteInput.placeholder = "備注";
         noteInput.value = window.itemNotes[item.id] || "";
         noteInput.className = "item-note-input";
         noteInput.oninput = (e) => {
