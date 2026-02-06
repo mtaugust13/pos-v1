@@ -30,7 +30,7 @@
         border-radius: 6px;
         border: 1.5px solid #D4AF37;
         background: #0B1929;
-        color: #D4AF37;
+        color: #d4d1cd;
       }
       .item-note-input::placeholder {
         color: #d4d1cd;
@@ -265,6 +265,7 @@
       display: block;
       white-space: normal;
       word-break: break-word;
+      color: #d4d1cd;
     }
 
     .cart-item-qty-input {
@@ -571,6 +572,11 @@
       opacity: 0.8;
     }
 
+    #cashInput::placeholder {
+      color: #d4d1cd;
+      opacity: 1;
+    }
+
     /* Scrollbar Styling */
     .cart-items::-webkit-scrollbar {
       width: 6px;
@@ -628,7 +634,13 @@
     <!-- Custom Modal for Purchase Confirmation -->
     <div id="purchaseModal" style="display:none;position:fixed;z-index:1000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.45);justify-content:center;align-items:center;">
       <div style="background:#1a3050;padding:32px 24px;border-radius:16px;box-shadow:0 4px 32px #0008;min-width:280px;text-align:center;border:2px solid #D4AF37;">
-        <div style="font-size:22px;font-weight:bold;margin-bottom:18px;color:#D4AF37;">確定要結帳嗎？</div>
+        <div style="font-size:22px;font-weight:bold;margin-bottom:12px;color:#D4AF37;">結帳</div>
+        <div style="font-size:14px;color:#FFD700;margin-bottom:6px;">應付金額</div>
+        <div id="purchaseTotalDisplay" style="font-size:28px;font-weight:bold;margin-bottom:12px;color:#d4d1cd;">$0</div>
+        <div style="font-size:14px;color:#FFD700;margin-bottom:6px;">收款金額</div>
+        <input id="cashInput" type="number" inputmode="decimal" min="0" placeholder="0" style="width:100%;font-size:18px;padding:10px 12px;border-radius:8px;border:2px solid #D4AF37;background:#0B1929;color:#d4d1cd;text-align:center;margin-bottom:12px;" />
+        <div style="font-size:14px;color:#FFD700;margin-bottom:6px;">找零</div>
+        <div id="changeDisplay" style="font-size:22px;font-weight:bold;margin-bottom:16px;color:#d4d1cd;">$0</div>
         <div style="display:flex;gap:18px;justify-content:center;">
           <button id="purchaseCancelBtn" style="padding:12px 28px;font-size:18px;border-radius:8px;border:none;background:#1a2d4a;color:#D4AF37;cursor:pointer;">取消</button>
           <button id="purchaseConfirmBtn" style="padding:12px 28px;font-size:18px;border-radius:8px;border:none;background:#D4AF37;color:#0B1929;cursor:pointer;font-weight:bold;">結帳</button>
@@ -640,8 +652,8 @@
     <div style="background:#1a3050;padding:32px 24px;border-radius:16px;box-shadow:0 4px 32px #0008;min-width:280px;text-align:center;border:2px solid #D4AF37;">
       <div style="font-size:22px;font-weight:bold;margin-bottom:18px;color:#D4AF37;">確定要清空購物車？</div>
       <div style="display:flex;gap:18px;justify-content:center;">
-        <button id="clearCartCancelBtn" style="padding:12px 28px;font-size:18px;border-radius:8px;border:none;background:#1a2d4a;color:#D4AF37;cursor:pointer;">取消</button>
-        <button id="clearCartConfirmBtn" style="padding:12px 28px;font-size:18px;border-radius:8px;border:none;background:#C41E3A;color:#D4AF37;cursor:pointer;">清空</button>
+        <button id="clearCartCancelBtn" style="padding:12px 28px;font-size:18px;font-weight:bold;border-radius:8px;border:none;background:#1a2d4a;color:#D4AF37;cursor:pointer;">取消</button>
+        <button id="clearCartConfirmBtn" style="padding:12px 28px;font-size:18px;font-weight:bold;border-radius:8px;border:none;background:#C41E3A;color:#D4AF37;cursor:pointer;">清空</button>
       </div>
     </div>
   </div>
@@ -909,9 +921,49 @@
             showAlert('購物車是空的');
             return;
           }
+          const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+          const totalDisplay = document.getElementById('purchaseTotalDisplay');
+          const cashInput = document.getElementById('cashInput');
+          const changeDisplay = document.getElementById('changeDisplay');
+
+          totalDisplay.textContent = "$" + total;
+          const defaultCashValue = String(total);
+          cashInput.value = defaultCashValue;
+          cashInput.dataset.defaultValue = defaultCashValue;
+          changeDisplay.textContent = "$0";
+
+          const updateChange = () => {
+            const paid = parseFloat(cashInput.value);
+            const change = isNaN(paid) ? 0 : paid - total;
+            changeDisplay.textContent = "$" + change;
+          };
+
+          cashInput.onfocus = () => {
+            if (cashInput.value === cashInput.dataset.defaultValue) {
+              cashInput.value = "";
+              changeDisplay.textContent = "$0";
+            }
+          };
+
+          cashInput.onblur = () => {
+            if (cashInput.value.trim() === "") {
+              cashInput.value = cashInput.dataset.defaultValue || defaultCashValue;
+              changeDisplay.textContent = "$0";
+            }
+          };
+
+          cashInput.oninput = updateChange;
           document.getElementById('purchaseModal').style.display = 'flex';
           // Handler for confirm
           document.getElementById('purchaseConfirmBtn').onclick = async function() {
+            let paid = parseFloat(cashInput.value);
+            if (isNaN(paid)) {
+              paid = total;
+            }
+            if (paid < total) {
+              showAlert('收款金額不足');
+              return;
+            }
             const token = localStorage.getItem("sessionToken");
             try {
               const res = await fetch(API_URL, {
@@ -1244,9 +1296,19 @@
       if (arguments.length > 1) {
         const note = arguments[1] || "";
         const price = arguments[2];
-        cart = cart.filter(item => !(item.id === itemId && item.note === note && item.price === price));
+        const item = cart.find(i => i.id === itemId && i.note === note && i.price === price);
+        if (item && item.qty > 1) {
+          item.qty -= 1;
+        } else {
+          cart = cart.filter(i => !(i.id === itemId && i.note === note && i.price === price));
+        }
       } else {
-        cart = cart.filter(item => item.id !== itemId);
+        const item = cart.find(i => i.id === itemId);
+        if (item && item.qty > 1) {
+          item.qty -= 1;
+        } else {
+          cart = cart.filter(i => i.id !== itemId);
+        }
       }
       updateCartDisplay();
     }
@@ -1274,7 +1336,6 @@
         const noteSpan = document.createElement("span");
         noteSpan.className = "cart-item-note";
         noteSpan.style.fontSize = "13px";
-        noteSpan.style.color = "#999";
         noteSpan.style.marginTop = "4px";
         noteSpan.textContent = item.note ? `(${item.note})` : "";
 
