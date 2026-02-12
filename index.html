@@ -86,19 +86,26 @@
       box-sizing: border-box;
     }
 
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background: #0B1929;
       color: #D4AF37;
-      height: 100vh;
-      overflow: hidden;
+      height: 100dvh;
+      min-height: 100dvh;
+      overscroll-behavior: none;
       touch-action: manipulation;
     }
 
     /* Login Screen */
     #login {
       width: 100%;
-      height: 100vh;
+      height: 100dvh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -152,7 +159,8 @@
     #app {
       display: none;
       width: 100%;
-      height: 100vh;
+      height: 100dvh;
+      min-height: 100dvh;
       display: flex;
       gap: 0;
       overflow-x: hidden;
@@ -207,6 +215,8 @@
       font-size: var(--font-lg);
       font-weight: bold;
       color: #D4AF37;
+      flex: 0 0 auto;
+      line-height: 1.2;
     }
 
     .cart-items {
@@ -216,8 +226,8 @@
       padding: 12px;
       background-image: url("sita.png");
       background-repeat: no-repeat;
-      background-position: left +5px bottom;
-      background-size: auto 160px;
+      background-position: left  bottom -30px;
+      background-size: auto 240px;
     }
 
     .cart-item {
@@ -358,7 +368,7 @@
     }
 
     .cart-footer {
-      padding: 16px 16px 36px;
+      padding: 16px;
       background: #1a3050;
       border-top: 2px solid #D4AF37;
     }
@@ -449,6 +459,10 @@
       overflow: hidden;
       overflow-x: hidden;
       margin-top: var(--top-header-height);
+      background-image: url("spyb.png");
+      background-repeat: no-repeat;
+      background-position: right -60px bottom -30px;
+      background-size: auto 180px;
     }
 
     .purchased-section-column .purchased-header {
@@ -458,6 +472,8 @@
       font-size: var(--font-lg);
       font-weight: bold;
       color: #D4AF37;
+      flex: 0 0 auto;
+      line-height: 1.2;
     }
 
     .purchased-section-column .purchased-list {
@@ -465,10 +481,6 @@
       overflow-y: auto;
       overflow-x: hidden;
       padding: 12px;
-      background-image: url("spyb.png");
-      background-repeat: no-repeat;
-      background-position: right -40px bottom;
-      background-size: auto 120px;
     }
 
     .items-header {
@@ -478,6 +490,8 @@
       font-size: var(--font-lg);
       font-weight: bold;
       color: #D4AF37;
+      flex: 0 0 auto;
+      line-height: 1.2;
     }
 
     .items-grid {
